@@ -1,0 +1,6 @@
+/.idea/
+/work_dirs/
+/.vscode/
+/tmp/
+/data/
+/libs/ops/least_squares/_ext.c

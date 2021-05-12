@@ -3,4 +3,5 @@
 /.vscode/
 /tmp/
 /data/
-/libs/ops/least_squares/_ext.c
+/monorun/ops/least_squares/_ext.c
+/checkpoints/

@@ -19,7 +19,7 @@ Please refer to [INSTALL.md](INSTALL.md).
 
 Download the official [KITTI 3D object dataset](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d), including [left color images](http://www.cvlibs.net/download.php?file=data_object_image_2.zip), [calibration files](http://www.cvlibs.net/download.php?file=data_object_calib.zip) and [training labels](http://www.cvlibs.net/download.php?file=data_object_label_2.zip).
 
-Download the [train/val/test image lists](https://drive.google.com/file/d/1edZKOKMV1Z8foip3QOMlnLte4DXuiJ0-/view?usp=sharing). For training with LiDAR supervision, download the preprocessed [object coordinate maps](https://drive.google.com/file/d/1yfgq0h0kzPQ6T6LEI3E0qQaIp_3mCVeZ/view?usp=sharing).
+Download the train/val/test image lists [[Google Drive](https://drive.google.com/file/d/1edZKOKMV1Z8foip3QOMlnLte4DXuiJ0-/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1nvk9ndmIdlruH8FEDL6bCA), password: `cj4u`]. For training with LiDAR supervision, download the preprocessed object coordinate maps [[Google Drive](https://drive.google.com/file/d/1yfgq0h0kzPQ6T6LEI3E0qQaIp_3mCVeZ/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1kTJe-VA1Az1jhm3ctjVI5g), password: `fp3h`].
 
 Extract the downloaded archives according to the following folder structure. It is recommended to symlink the dataset root to `$MonoRUn_ROOT/data`. If your folder structure is different, you may need to change the corresponding paths in config files.
 
@@ -99,8 +99,8 @@ ann_file=train_data_root + 'trainval_list.txt',
 
 You can download the weights pretrained on the KITTI train split:
 
-- `kitti_multiclass.pth` [[Google Drive](https://drive.google.com/file/d/1J_3BnMrhKGCeBT1R2VxK8hZbUhUlHpDd/view?usp=sharing)]
-- `kitti_multiclass_lidar_supv.pth` [[Google Drive](https://drive.google.com/file/d/1T0aTZtjs1YGU2j09VldLubUr_057p_eJ/view?usp=sharing)]
+- `kitti_multiclass.pth` [[Google Drive](https://drive.google.com/file/d/1J_3BnMrhKGCeBT1R2VxK8hZbUhUlHpDd/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1kYLP8YjYPi9QSQH2Y-XtrA), password: `6bih`]
+- `kitti_multiclass_lidar_supv.pth` [[Google Drive](https://drive.google.com/file/d/1T0aTZtjs1YGU2j09VldLubUr_057p_eJ/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1wzfQxnGH08RV9d0uCnZRwQ), password: `nmdb`]
 
 To test and evaluate on the validation set using config at `$CONFIG_PATH` and checkpoint at `$CPT_PATH`:
 

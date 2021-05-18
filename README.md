@@ -44,7 +44,7 @@ $MonoRUn_ROOT
 │   │       └── trainval_list.txt
 ```
 
-Run the the preparation script to generate image metas:
+Run the preparation script to generate image metas:
 
 ```bash
 cd $MonoRUn_ROOT
@@ -120,7 +120,7 @@ To view other testing options:
 python test.py -h
 ```
 
-Note: the training and testing scripts in the root directory are wrappers for the original scripts taken from MMDetection, which can be found in `$MonoRUn_ROOT\tools`). For advanced usage, please refer to the [official MMDetection docs](https://mmdetection.readthedocs.io).
+Note: the training and testing scripts in the root directory are wrappers for the original scripts taken from MMDetection, which can be found in `$MonoRUn_ROOT\tools`. For advanced usage, please refer to the [official MMDetection docs](https://mmdetection.readthedocs.io).
 
 ## Visualization
 
@@ -138,4 +138,3 @@ If you find this project useful in your research, please consider citing:
   year = {2021}
 }
 ```
-

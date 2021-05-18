@@ -12,8 +12,6 @@ class UncertProjectionHead(nn.Module):
                  loss_proj=dict(
                      type='RobustKLLoss',
                      loss_weight=1.0,
-                     show_pos=True,
-                     grad_decay=True,
                      momentum=0.1),
                  z_min=0.5,
                  allowed_border=200,

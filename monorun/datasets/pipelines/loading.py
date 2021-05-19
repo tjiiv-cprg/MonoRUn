@@ -2,7 +2,6 @@ import os.path as osp
 
 import mmcv
 import numpy as np
-from libtiff import TIFF
 
 from mmdet.datasets import PIPELINES
 

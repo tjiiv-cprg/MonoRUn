@@ -30,3 +30,7 @@ def main():
             shape = img.shape[:2]
             np.savetxt(osp.join(meta_dir, img_idx + '.txt'), shape, delimiter=',')
     print('Done!')
+
+
+if __name__ == '__main__':
+    main()

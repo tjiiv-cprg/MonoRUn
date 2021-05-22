@@ -40,7 +40,7 @@ def args_to_str(args):
     if args.work_dir is not None:
         argv += ['--work-dir', args.work_dir]
     if args.resume_from is not None:
-        argv += ['--resume-frome', args.resume_from]
+        argv += ['--resume-from', args.resume_from]
     if args.no_validate:
         argv.append('--no-validate')
     if args.seed is not None:

@@ -46,6 +46,7 @@ def args_to_str(args):
 
 
 def main():
+    # Todo: add visualization
     args = parse_args()
     if args.gpu_ids is not None:
         gpu_ids = args.gpu_ids

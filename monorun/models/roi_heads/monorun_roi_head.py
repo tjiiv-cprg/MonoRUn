@@ -578,7 +578,7 @@ class MonoRUnRoIHead(StandardRoIHead):
         # return noc and std maps
         if getattr(rcnn_test_cfg, 'debug', False):
             if det_bboxes.shape[0] == 0:
-                noc_maps = [np.zeros(
+                oc_maps = [np.zeros(
                     (0, 3, 0, 0), dtype=np.float32)] * self.bbox_head.num_classes
                 std_maps = [np.zeros(
                     (0, self.noc_head.uncert_channels, 0, 0),
@@ -588,27 +588,27 @@ class MonoRUnRoIHead(StandardRoIHead):
                 latent_vecs = [np.zeros(
                     (0, 16), dtype=np.float32)] * self.bbox_head.num_classes
             else:
-                noc_pred = coords_3d_pred.cpu().numpy()
+                oc_pred = coords_3d_pred.cpu().numpy()
                 std = torch.exp(proj_logstd).cpu().numpy()
                 pose_cov = pose_results['pose_cov_calib'].cpu().numpy()
                 det_labels = det_labels.cpu().numpy()
                 latent = reg_results['latent_pred'].cpu().numpy()
-                noc_maps = []
+                oc_maps = []
                 std_maps = []
                 pose_covs = []
                 latent_vecs = []
                 for i in range(self.bbox_head.num_classes):
                     class_mask = det_labels == i
                     keep_inds_3d_single = keep_inds_3d[i]
-                    noc_maps.append(
-                        noc_pred[class_mask][keep_inds_3d_single])
+                    oc_maps.append(
+                        oc_pred[class_mask][keep_inds_3d_single])
                     std_maps.append(
                         std[class_mask][keep_inds_3d_single])
                     pose_covs.append(
                         pose_cov[class_mask][keep_inds_3d_single])
                     latent_vecs.append(
                         latent[class_mask][keep_inds_3d_single])
-            results.update(noc_maps=noc_maps, std_maps=std_maps,
+            results.update(oc_maps=oc_maps, std_maps=std_maps,
                            pose_covs=pose_covs, latent_vecs=latent_vecs)
         if self.new_version:
             return [results]

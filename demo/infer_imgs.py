@@ -7,11 +7,9 @@ import argparse
 import cv2
 import numpy as np
 
-from monorun.core import draw_box_3d_pred, show_bev
-
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Test (and evaluate)')
+    parser = argparse.ArgumentParser(description='Infer from images in a directory')
     parser.add_argument('image_dir', help='directory of input images')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
@@ -45,6 +43,7 @@ def main():
 
     from mmcv.utils import track_iter_progress
     from monorun.apis import init_detector, inference_detector
+    from monorun.core import draw_box_3d_pred, show_bev
 
     image_dir = args.image_dir
     assert os.path.isdir(image_dir)
@@ -71,7 +70,7 @@ def main():
             img, None, result['bbox_results'], result['bbox_3d_results'],
             result['oc_maps'], result['std_maps'], result['pose_covs'],
             calib, scale=25, score_thr=args.score_thr,
-            width=img.shape[1], height=img.shape[0] + 100,
+            width=img.shape[1], height=img.shape[0],
             cov_scale=args.cov_scale)
         img_pred_3d = np.concatenate([img_pred_3d, viz_bev], axis=0)
         cv2.imwrite(os.path.join(result_dir, img_filename), img_pred_3d)

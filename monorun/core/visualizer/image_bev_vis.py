@@ -119,7 +119,7 @@ def show_bev(
             x1, y1, x2, y2, _ = bbox_results[i][j]
             img_roi = img[round(y1):round(y2), round(x1):round(x2)]
             rgb = cv2.resize(img_roi, (28, 28))[mask[j]][sort_idx]  # (np, 3)
-            if thickness == 2:
+            if thickness > 1:
                 pts_bev = np.concatenate(
                     [pts_bev + np.array([-0.5, -0.5]),
                      pts_bev + np.array([-0.5, 0.5]),

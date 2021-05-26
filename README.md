@@ -83,24 +83,15 @@ By default, logs and checkpoints will be saved to `$MonoRUn_ROOT/work_dirs`. You
 tensorboard --logdir $MonoRUn_ROOT/work_dirs
 ```
 
-The default training data is the 3712-image training split. If you want to train on the full training set (train-val), please edit the config file and replace the line 
-
-```python
-ann_file=train_data_root + 'mono3dsplit_train_list.txt',
-```
-
-with
-
-```python
-ann_file=train_data_root + 'trainval_list.txt',
-```
+The above configs use the 3712-image split for training and the other split for validating. If you want to train on the full training set (train-val), use the config files with `_trainval` postfix.
 
 ## Test
 
-You can download the weights pretrained on the KITTI train split:
+You can download the pretrained models:
 
-- `kitti_multiclass.pth` [[Google Drive](https://drive.google.com/file/d/1J_3BnMrhKGCeBT1R2VxK8hZbUhUlHpDd/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1kYLP8YjYPi9QSQH2Y-XtrA), password: `6bih`]
-- `kitti_multiclass_lidar_supv.pth` [[Google Drive](https://drive.google.com/file/d/1T0aTZtjs1YGU2j09VldLubUr_057p_eJ/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1wzfQxnGH08RV9d0uCnZRwQ), password: `nmdb`]
+- `kitti_multiclass.pth` [[Google Drive](https://drive.google.com/file/d/1J_3BnMrhKGCeBT1R2VxK8hZbUhUlHpDd/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1kYLP8YjYPi9QSQH2Y-XtrA), password: `6bih`] trained on KITTI training split
+- `kitti_multiclass_lidar_supv.pth` [[Google Drive](https://drive.google.com/file/d/1T0aTZtjs1YGU2j09VldLubUr_057p_eJ/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1wzfQxnGH08RV9d0uCnZRwQ), password: `nmdb`] trained on KITTI training split
+- `kitti_multiclass_lidar_supv_trainval.pth` [[Google Drive](https://drive.google.com/file/d/1myWQKL26W_uVIAPlaq5RoXiuUeyqQYVS/view?usp=sharing) | [Baidu Pan](https://pan.baidu.com/s/1uRDDEYiFiRpuO3Ppa7Jtdg), password: `hg2r`] trained on KITTI train-val
 
 To test and evaluate on the validation set using config at `$CONFIG_PATH` and checkpoint at `$CPT_PATH`:
 

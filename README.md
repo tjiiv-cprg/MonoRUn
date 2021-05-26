@@ -114,17 +114,23 @@ To test on the test set and save detection results to `$RESULT_DIR`:
 python test.py $CONFIG_PATH $CPT_PATH --result-dir $RESULT_DIR --gpu-ids 0
 ```
 
+You can append the argument `--show-dir $SHOW_DIR` to save visualized results.
+
 To view other testing options:
 
 ```bash
 python test.py -h
 ```
 
-Note: the training and testing scripts in the root directory are wrappers for the original scripts taken from MMDetection, which can be found in `$MonoRUn_ROOT\tools`. For advanced usage, please refer to the [official MMDetection docs](https://mmdetection.readthedocs.io).
+Note: the training and testing scripts in the root directory are wrappers for the original scripts taken from MMDetection, which can be found in `$MonoRUn_ROOT/tools`. For advanced usage, please refer to the [official MMDetection docs](https://mmdetection.readthedocs.io).
 
-## Visualization
+## Demo
 
-To be added.
+We provide a [demo script](demo/infer_imgs.py) to perform inference on images in a directory and save the visualized results. Example:
+
+```bash
+python demo/infer_imgs.py $KITTI_RAW_DIR/2011_09_30/2011_09_30_drive_0027_sync/image_02/data configs/kitti_multiclass_lidar_supv_trainval.py checkpoints/kitti_multiclass_lidar_supv_trainval.pth --calib demo/calib.csv --show-dir show/2011_09_30_drive_0027
+```
 
 ## Citation
 

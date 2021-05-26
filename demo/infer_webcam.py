@@ -55,7 +55,6 @@ def main():
         raise NotImplementedError('multi-gpu testing is not yet supported')
 
     from monorun.apis import init_detector, inference_detector
-    from monorun.core import draw_box_3d_pred, show_bev
 
     camera = cv2.VideoCapture(args.device)
     cmd = 'v4l2-ctl -d /dev/video{} -c sharpness=0'.format(args.device)
@@ -92,22 +91,24 @@ def main():
         cv2.remap(img, undistort_map[0], undistort_map[1],
                   cv2.INTER_LINEAR, dst=img_undistort)
         result = inference_detector(model, img_undistort, calib_crop)
-
-        img_pred_3d = img_undistort.copy()
-        draw_box_3d_pred(
-            img_pred_3d, result['bbox_3d_results'], calib_crop, score_thr=args.score_thr)
-        viz_bev = show_bev(
-            img_undistort, None, result['bbox_results'], result['bbox_3d_results'],
-            result['oc_maps'], result['std_maps'], result['pose_covs'],
-            calib_crop, scale=25, score_thr=args.score_thr,
-            width=img_undistort.shape[1], height=img_undistort.shape[0],
-            cov_scale=args.cov_scale)
-        cv2.imshow('BEV', viz_bev)
-        cv2.imshow('CameraView', img_pred_3d)
+        bev = model.show_result(
+            img_undistort,
+            calib_crop,
+            result,
+            score_thr=args.score_thr,
+            cov_scale=args.cov_scale,
+            views=['bev'],)
+        cam_view = model.show_result(
+            img_undistort,
+            calib_crop,
+            result,
+            score_thr=args.score_thr,
+            views=['camera'])
+        cv2.imshow('BEV', bev)
+        cv2.imshow('CameraView', cam_view)
         ch = cv2.waitKey(1)
         if ch == 27 or ch == ord('q') or ch == ord('Q'):
             break
-    return
 
 
 if __name__ == '__main__':

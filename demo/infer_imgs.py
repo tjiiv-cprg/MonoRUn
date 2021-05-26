@@ -15,7 +15,9 @@ def parse_args():
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--calib', help='calibration matrix in .csv format',
                         default='demo/calib.csv')
-    parser.add_argument('--result-dir', help='directory to save results')
+    parser.add_argument(
+        '--show-dir', 
+        help='directory where painted images will be saved (default: $IMAGE_DIR/show)')
     parser.add_argument(
         '--gpu-ids',
         type=int,
@@ -43,15 +45,14 @@ def main():
 
     from mmcv.utils import track_iter_progress
     from monorun.apis import init_detector, inference_detector
-    from monorun.core import draw_box_3d_pred, show_bev
 
     image_dir = args.image_dir
     assert os.path.isdir(image_dir)
-    result_dir = args.result_dir
-    if result_dir is None:
-        result_dir = os.path.join(image_dir, 'results')
-    if not os.path.exists(result_dir):
-        os.mkdir(result_dir)
+    show_dir = args.show_dir
+    if show_dir is None:
+        show_dir = os.path.join(image_dir, 'show')
+    if not os.path.exists(show_dir):
+        os.makedirs(show_dir)
     calib = np.loadtxt(args.calib, delimiter=',').astype(np.float32)
 
     # build the model from a config file and a checkpoint file
@@ -63,17 +64,13 @@ def main():
     for i, img_filename in enumerate(track_iter_progress(img_list)):
         img = cv2.imread(os.path.join(image_dir, img_filename))
         result = inference_detector(model, img, calib)
-        img_pred_3d = img.copy()
-        draw_box_3d_pred(
-            img_pred_3d, result['bbox_3d_results'], calib, score_thr=args.score_thr)
-        viz_bev = show_bev(
-            img, None, result['bbox_results'], result['bbox_3d_results'],
-            result['oc_maps'], result['std_maps'], result['pose_covs'],
-            calib, scale=25, score_thr=args.score_thr,
-            width=img.shape[1], height=img.shape[0],
-            cov_scale=args.cov_scale)
-        img_pred_3d = np.concatenate([img_pred_3d, viz_bev], axis=0)
-        cv2.imwrite(os.path.join(result_dir, img_filename), img_pred_3d)
+        model.show_result(
+            img,
+            calib,
+            result,
+            score_thr=args.score_thr,
+            cov_scale=args.cov_scale,
+            out_file=os.path.join(show_dir, img_filename))
     return
 
 

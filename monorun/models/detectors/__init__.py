@@ -1,3 +1,3 @@
-from .two_stage import TwoStageDetectorMod
+from .monorun import MonoRUnDetector
 
-__all__ = ['TwoStageDetectorMod']
+__all__ = ['MonoRUnDetector']

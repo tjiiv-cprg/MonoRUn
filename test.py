@@ -28,6 +28,14 @@ def parse_args():
         type=int,
         nargs='+',
         help='ids of gpus to use')
+    parser.add_argument(
+        '--show-dir', help='directory where painted images will be saved')
+    parser.add_argument(
+        '--score-thr', type=float, default=0.3,
+        help='bbox score threshold for visualization')
+    parser.add_argument(
+        '--cov-scale', type=float, default=5.0,
+        help='covariance scaling factor for visualization')
     args = parser.parse_args()
     return args
 
@@ -42,6 +50,9 @@ def args_to_str(args):
                  'summary_file=' + os.path.join(args.result_dir, 'eval_results.txt')]
     if args.val_set:
         argv.append('--val-set')
+    if args.show_dir is not None:
+        argv += ['--show-dir', args.show_dir,
+                 '--show-cov-scale', str(args.cov_scale)]
     return argv
 
 

@@ -1,5 +1,5 @@
 model = dict(
-    type='TwoStageDetectorMod',
+    type='MonoRUnDetector',
     pretrained='torchvision://resnet101',
     backbone=dict(
         type='ResNet',

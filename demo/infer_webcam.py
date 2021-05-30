@@ -37,6 +37,9 @@ def parse_args():
     parser.add_argument(
         '--score-thr', type=float, default=0.3, help='bbox score threshold')
     parser.add_argument(
+        '--extra', action='store_true',
+        help='whether to draw extra results (covariance and reconstruction)')
+    parser.add_argument(
         '--cov-scale', type=float, default=5.0, help='covariance scaling factor')
     args = parser.parse_args()
     return args
@@ -63,7 +66,7 @@ def main():
 
     # load calibration
     calib = np.loadtxt(args.calib, delimiter=',').astype(np.float32)
-    distort = np.loadtxt(args.distort, delimiter=', ').astype(np.float32)
+    distort = np.loadtxt(args.distort, delimiter=',').astype(np.float32)
     map_fun = cv2.fisheye.initUndistortRectifyMap if args.fisheye \
         else cv2.initUndistortRectifyMap
     width, height = args.size
@@ -83,7 +86,8 @@ def main():
 
     # build the model from a config file and a checkpoint file
     model = init_detector(args.config, args.checkpoint, device='cuda:0')
-    model.test_cfg['rcnn']['debug'] = True
+    if args.extra:
+        model.test_cfg['rcnn']['debug'] = True
 
     print('Press "Esc", "q" or "Q" to exit.')
     while True:

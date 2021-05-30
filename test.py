@@ -34,6 +34,9 @@ def parse_args():
         '--score-thr', type=float, default=0.3,
         help='bbox score threshold for visualization')
     parser.add_argument(
+        '--extra', action='store_true',
+        help='whether to draw extra results (covariance and reconstruction)')
+    parser.add_argument(
         '--cov-scale', type=float, default=5.0,
         help='covariance scaling factor for visualization')
     args = parser.parse_args()
@@ -53,6 +56,8 @@ def args_to_str(args):
     if args.show_dir is not None:
         argv += ['--show-dir', args.show_dir,
                  '--show-cov-scale', str(args.cov_scale)]
+    if args.extra:
+        argv.append('--show-extra')
     return argv
 
 

@@ -85,6 +85,9 @@ def parse_args():
         action='store_true',
         help='whether to test validation set instead of test set')
     parser.add_argument(
+        '--show-extra', action='store_true',
+        help='whether to draw extra results (covariance and reconstruction)')
+    parser.add_argument(
         '--show-cov-scale', type=float, default=5.0,
         help='covariance scaling factor for visualization')
     args = parser.parse_args()
@@ -173,7 +176,7 @@ def main():
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
     if args.fuse_conv_bn:
         model = fuse_conv_bn(model)
-    if args.show or args.show_dir:
+    if (args.show or args.show_dir) and args.show_extra:
         model.test_cfg['rcnn']['debug'] = True
     # old versions did not save class info in checkpoints, this walkaround is
     # for backward compatibility

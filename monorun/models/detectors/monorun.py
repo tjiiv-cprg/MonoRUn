@@ -48,10 +48,12 @@ class MonoRUnDetector(TwoStageDetector):
         if 'bev' in views:
             viz_bev = show_bev(
                 img, None, result['bbox_results'], result['bbox_3d_results'],
-                result['oc_maps'], result['std_maps'], result['pose_covs'],
-                cam_intrinsic, scale=bev_scale, score_thr=score_thr,
-                width=img.shape[1], height=img.shape[0],
-                cov_scale=cov_scale, thickness=2)
+                cam_intrinsic, width=img.shape[1], height=img.shape[0], scale=bev_scale,
+                oc_maps=result.get('oc_maps'),
+                std_maps=result.get('std_maps'),
+                pose_covs=result.get('pose_covs'),
+                cov_scale=cov_scale,
+                score_thr=score_thr, thickness=2)
             img_show.append(viz_bev)
         if len(img_show) == 1:
             img_show = img_show[0]

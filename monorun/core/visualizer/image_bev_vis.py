@@ -48,14 +48,15 @@ def draw_cov(img, mean, covariance, color, thickness=1, cov_scale=8.0):
 
 
 def show_bev(
-        img, labels, bbox_results, bbox_3d_results, oc_maps, std_maps, pose_covs,
-        cali_mat, width=None, height=None, scale=10, score_thr=0.1, thickness=2,
-        cov_scale=8.0):
+        img, labels, bbox_results, bbox_3d_results, cali_mat, width=None, height=None,
+        scale=10, oc_maps=None, std_maps=None, pose_covs=None, cov_scale=8.0,
+        score_thr=0.1, thickness=2):
     """
     Args:
         bbox_3d_results (list[ndarray]): multiclass results,
             in format [l, h, w, x, y, z, ry, score]
     """
+    draw_pts = oc_maps is not None and std_maps is not None
     if (width is None) or (height is None):
         height, width = img.shape[:2]
     bev_img = np.full((height, width, 3), 255, dtype=np.uint8)
@@ -97,11 +98,12 @@ def show_bev(
                               color, thickness=thickness)
     # draw det results:
     for i in range(len(bbox_3d_results)):
-        oc_map = oc_maps[i].transpose((0, 2, 3, 1))  # (n, h, w, 3)
-        std_map = std_maps[i].mean(axis=1)  # (n, h, w)
-        std_mean = std_map.mean(axis=(1, 2))  # (n, )
-        mask = std_map < 2 * std_mean[:, None, None]  # (n, h, w)
-        for j in range(len(oc_map)):
+        if draw_pts:
+            oc_map = oc_maps[i].transpose((0, 2, 3, 1))  # (n, h, w, 3)
+            std_map = std_maps[i].mean(axis=1)  # (n, h, w)
+            std_mean = std_map.mean(axis=(1, 2))  # (n, )
+            mask = std_map < 2 * std_mean[:, None, None]  # (n, h, w)
+        for j in range(len(bbox_3d_results[i])):
             bbox_3d_result = bbox_3d_results[i][j]
             if bbox_3d_result[-1] < score_thr:
                 continue
@@ -110,40 +112,41 @@ def show_bev(
                               [0, 1, 0],
                               [-np.sin(ry), 0, +np.cos(ry)]])
             t = bbox_3d_result[3:6]
-            oc_pts = oc_map[j][mask[j]]  # (np, 3)
-            sort_idx = np.argsort(oc_pts[:, 1])[::-1]
-            oc_pts = oc_pts[sort_idx]
-            pts = oc_pts @ r_mat.T + t  # (np, 3)
-            pts_bev = pts[:, [0, 2]] @ proj_mat.T + origin
-            # get rgb
-            x1, y1, x2, y2, _ = bbox_results[i][j]
-            img_roi = img[round(y1):round(y2), round(x1):round(x2)]
-            rgb = cv2.resize(img_roi, (28, 28))[mask[j]][sort_idx]  # (np, 3)
-            if thickness > 1:
-                pts_bev = np.concatenate(
-                    [pts_bev + np.array([-0.5, -0.5]),
-                     pts_bev + np.array([-0.5, 0.5]),
-                     pts_bev + np.array([0.5, 0.5]),
-                     pts_bev + np.array([0.5, -0.5])], axis=1).reshape((-1, 2))
-                rgb = np.repeat(rgb, 4, axis=0)
-            inlier_mask = (pts_bev[:, 0] > 0) & (pts_bev[:, 0] < width - 1) & (
-                    pts_bev[:, 1] > 0) & (pts_bev[:, 1] < height - 1)
-            pts_bev = pts_bev[inlier_mask]
-            rgb = rgb[inlier_mask]
             # draw pts
-            bev_img[
-                np.round(pts_bev[:, 1]).astype(np.int), np.round(pts_bev[:, 0]).astype(
-                    np.int)] = rgb
+            if draw_pts:
+                oc_pts = oc_map[j][mask[j]]  # (np, 3)
+                sort_idx = np.argsort(oc_pts[:, 1])[::-1]
+                oc_pts = oc_pts[sort_idx]
+                pts = oc_pts @ r_mat.T + t  # (np, 3)
+                pts_bev = pts[:, [0, 2]] @ proj_mat.T + origin
+                # get rgb
+                x1, y1, x2, y2, _ = bbox_results[i][j]
+                img_roi = img[round(y1):round(y2), round(x1):round(x2)]
+                rgb = cv2.resize(img_roi, (28, 28))[mask[j]][sort_idx]  # (np, 3)
+                if thickness > 1:
+                    pts_bev = np.concatenate(
+                        [pts_bev + np.array([-0.5, -0.5]),
+                         pts_bev + np.array([-0.5, 0.5]),
+                         pts_bev + np.array([0.5, 0.5]),
+                         pts_bev + np.array([0.5, -0.5])], axis=1).reshape((-1, 2))
+                    rgb = np.repeat(rgb, 4, axis=0)
+                inlier_mask = (pts_bev[:, 0] > 0) & (pts_bev[:, 0] < width - 1) & (
+                        pts_bev[:, 1] > 0) & (pts_bev[:, 1] < height - 1)
+                pts_bev = pts_bev[inlier_mask]
+                rgb = rgb[inlier_mask]
+                bev_img[np.round(pts_bev[:, 1]).astype(np.int),
+                        np.round(pts_bev[:, 0]).astype(np.int)] = rgb
             # draw boxes
             corners = compute_box_bev(bbox_3d_result)
             corners_bev = (proj_mat @ corners[[0, 2], :]).T + origin
             cv2.polylines(bev_img, corners_bev.astype(np.int32)[None, ...], False,
                           (10, 60, 240), thickness=thickness)
             # draw covariances
-            cov_bev = pose_covs[i][j, [3, 1]][:, [3, 1]] * (scale * scale)
-            mean = t[[2, 0]] * scale + origin
-            draw_cov(bev_img, mean, cov_bev, (10, 60, 240), thickness=thickness,
-                     cov_scale=cov_scale)
+            if pose_covs is not None:
+                cov_bev = pose_covs[i][j, [3, 1]][:, [3, 1]] * (scale * scale)
+                mean = t[[2, 0]] * scale + origin
+                draw_cov(bev_img, mean, cov_bev, (10, 60, 240), thickness=thickness,
+                         cov_scale=cov_scale)
     return bev_img
 
 

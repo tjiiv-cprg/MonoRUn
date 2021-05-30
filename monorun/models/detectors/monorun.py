@@ -35,6 +35,8 @@ class MonoRUnDetector(TwoStageDetector):
                     wait_time=0,
                     out_file=None,
                     views=['camera', 'bev']):
+        if self.roi_head.new_version:
+            result = result[0]
         img = mmcv.imread(img)
         img_show = []
         if 'camera' in views:

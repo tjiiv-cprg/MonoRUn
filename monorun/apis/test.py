@@ -1,8 +1,9 @@
 import os.path as osp
 import mmcv
 import torch
+from mmcv.image import tensor2imgs
 
-from mmdet.core import encode_mask_results, tensor2imgs
+from mmdet.core import encode_mask_results
 
 
 def single_gpu_test(model,

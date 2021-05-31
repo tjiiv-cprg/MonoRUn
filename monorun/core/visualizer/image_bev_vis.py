@@ -35,16 +35,19 @@ def draw_cov(img, mean, covariance, color, thickness=1, cov_scale=8.0):
         covariance : array_like
             The 2x2 covariance matrix of the Gaussian distribution.
     """
-    # chi2inv(0.95, 2) = 5.9915
-    vals, vecs = np.linalg.eigh(5.9915 * cov_scale * covariance)
-    indices = vals.argsort()[::-1]
-    vals, vecs = np.sqrt(vals[indices]), vecs[:, indices]
+    try:
+        # chi2inv(0.95, 2) = 5.9915
+        vals, vecs = np.linalg.eigh(5.9915 * cov_scale * covariance)
+        indices = vals.argsort()[::-1]
+        vals, vecs = np.sqrt(vals[indices]), vecs[:, indices]
 
-    center = int(mean[0] + .5), int(mean[1] + .5)
-    axes = int(vals[0] + .5), int(vals[1] + .5)
-    angle = int(180. * np.arctan2(vecs[1, 0], vecs[0, 0]) / np.pi)
-    cv2.ellipse(
-        img, center, axes, angle, 0, 360, color, thickness)
+        center = int(mean[0] + .5), int(mean[1] + .5)
+        axes = int(vals[0] + .5), int(vals[1] + .5)
+        angle = int(180. * np.arctan2(vecs[1, 0], vecs[0, 0]) / np.pi)
+        cv2.ellipse(
+            img, center, axes, angle, 0, 360, color, thickness)
+    except (ValueError, np.linalg.LinAlgError):
+        pass
 
 
 def show_bev(

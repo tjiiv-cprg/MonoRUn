@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('--crop', nargs=2,
                         metavar=('WIDTH', 'HEIGHT'), type=int,
                         help='size of the cropped frame',
-                        default=(1280, 360))
+                        default=(1280, 384))
     parser.add_argument('--fps', help='device FPS', type=float)
     parser.add_argument('--calib', help='calibration matrix in .csv format',
                         default='demo/calib.csv')

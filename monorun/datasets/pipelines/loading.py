@@ -53,8 +53,6 @@ class LoadAnnotations3D(object):
     def _load_bboxes_3d(results):
         results['gt_bboxes_3d'] = results['ann_info']['bboxes_3d']
         results['bbox_3d_fields'].append('gt_bboxes_3d')
-        results['gt_proj_r_mats'] = results['ann_info']['gt_proj_r_mats']
-        results['gt_proj_t_vecs'] = results['ann_info']['gt_proj_t_vecs']
         return results
 
     def _load_depth(self, results):

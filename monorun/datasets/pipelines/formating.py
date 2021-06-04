@@ -10,8 +10,7 @@ class DefaultFormatBundle3D(DefaultFormatBundle):
 
     def __call__(self, results):
         results = super().__call__(results)
-        for key in ['gt_bboxes_3d', 'gt_pose_r_mats', 'gt_pose_t_vecs',
-                    'gt_proj_r_mats', 'gt_proj_t_vecs', 'cali_k_mat', 'cam_t_vec']:
+        for key in ['gt_bboxes_3d', 'cam_intrinsic']:
             if key not in results:
                 continue
             results[key] = DC(to_tensor(results[key]))

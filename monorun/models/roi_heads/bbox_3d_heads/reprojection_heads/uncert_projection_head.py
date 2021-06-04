@@ -33,29 +33,42 @@ class UncertProjectionHead(nn.Module):
         self.train_std_of_encoded_error = True
 
     @auto_fp16()
-    def forward(self, coords_3d, proj_r_mats, proj_t_vecs, img_shapes):
+    def forward(self, coords_3d, pose, cam_intrinsic, img_shapes):
         """
         Args:
             coords_3d (torch.Tensor): Shape (n, 3, h, w)
-            proj_r_mats (torch.Tensor): Shape (n, 3, 3)
-            proj_t_vecs (torch.Tensor): Shape (n, 3, 1)
+            pose (torch.Tensor): shape (..., n, 4)
+            cam_intrinsic (torch.Tensor): shape (n, 3, 3)
             img_shapes (torch.Tensor): Shape (n, 2)
 
         Returns:
             torch.Tensor: Shape (n, 2, h, w), projected 2D coordinates
         """
         n, c, h, w = coords_3d.size()
-        if n == 0:
-            coords_3d = coords_3d.new_zeros((1, c, h, w)) + coords_3d.sum()
-            proj_r_mats = proj_r_mats.new_zeros((1, 3, 3))
-        coords_3d_proj = torch.einsum(
-            'nchw,nxc->nxhw', coords_3d, proj_r_mats
-        ) + proj_t_vecs.unsqueeze(-1)
-        coords_2d_proj, coord_z = coords_3d_proj.split([2, 1], dim=1)
-        # (n, 2, 28, 28)
+
+        yaw = pose[..., 3]
+        sin_yaw = torch.sin(yaw)
+        cos_yaw = torch.cos(yaw)
+        # [[ cos_yaw, 0, sin_yaw],
+        #  [       0, 1,       0],
+        #  [-sin_yaw, 0, cos_yaw]]
+        rot_mats = cos_yaw.new_zeros(pose.shape[:-1] + (3, 3))
+        rot_mats[..., 0, 0] = cos_yaw
+        rot_mats[..., 2, 2] = cos_yaw
+        rot_mats[..., 0, 2] = sin_yaw
+        rot_mats[..., 2, 0] = -sin_yaw
+        rot_mats[..., 1, 1] = 1
+
+        proj_r_mats = cam_intrinsic @ rot_mats  # (..., 3, 3)
+        proj_t_vecs = cam_intrinsic @ pose[..., :3, None]  # (..., 3, 1)
+
+        coords_3d_proj = proj_r_mats @ coords_3d.reshape(n, 3, h * w) + proj_t_vecs
+        coords_3d_proj = coords_3d_proj.reshape(pose.shape[:-1] + (3, h, w))
+        coords_2d_proj, coord_z = coords_3d_proj.split([2, 1], dim=-3)
+        # (..., 2, 28, 28)
         coords_2d_proj = coords_2d_proj / coord_z.clamp(min=self.z_min)
 
-        coords_2d_min = -self.allowed_border  # Number
+        coords_2d_min = -self.allowed_border  # scalar
         # (n, 2, 1, 1) [[u_max, v_max]]
         coords_2d_max = img_shapes[:, [1, 0], None, None] + self.allowed_border
         coords_2d_proj.clamp_(min=coords_2d_min)
@@ -63,26 +76,21 @@ class UncertProjectionHead(nn.Module):
 
         return coords_2d_proj
 
-    def get_properties(self, sampling_results,
-                       gt_proj_r_mats, gt_proj_t_vecs, gt_bboxes_3d, img_metas):
+    def get_properties(self, sampling_results, cam_intrinsic, gt_bboxes_3d, img_metas):
         img_shapes = []
-        for img_meta, res in zip(img_metas, sampling_results):
+        pos_cam_intrinsic = []
+        for img_meta, cam_intrinsic_single, res in zip(
+                img_metas, cam_intrinsic, sampling_results):
             img_shapes += [img_meta['img_shape'][:2]] * len(res.pos_inds)
+            pos_cam_intrinsic += [cam_intrinsic_single] * len(res.pos_inds)
         if len(img_shapes):
-            img_shapes = gt_proj_r_mats[0].new_tensor(img_shapes)  # [Npos, 2]
+            img_shapes = cam_intrinsic[0].new_tensor(img_shapes)  # [Npos, 2]
+            pos_cam_intrinsic = torch.stack(pos_cam_intrinsic, dim=0)
         else:
-            img_shapes = gt_proj_r_mats[0].new_zeros((0, 2))
-
+            img_shapes = cam_intrinsic[0].new_zeros((0, 2))
+            pos_cam_intrinsic = cam_intrinsic[0].new_zeros((0, 3, 3))
         pos_assigned_gt_inds = [
             res.pos_assigned_gt_inds for res in sampling_results]
-        proj_r_mats = torch.cat(
-            [gt_proj_r_mats_single[pos_assigned_gt_inds_single]
-             for gt_proj_r_mats_single, pos_assigned_gt_inds_single in
-             zip(gt_proj_r_mats, pos_assigned_gt_inds)], dim=0)
-        proj_t_vecs = torch.cat(
-            [gt_proj_t_vecs_single[pos_assigned_gt_inds_single]
-             for gt_proj_t_vecs_single, pos_assigned_gt_inds_single in
-             zip(gt_proj_t_vecs, pos_assigned_gt_inds)], dim=0)
         pos_bboxes_3d = torch.cat(
             [gt_bboxes_3d_single[pos_assigned_gt_inds_single]
              for gt_bboxes_3d_single, pos_assigned_gt_inds_single in
@@ -91,7 +99,7 @@ class UncertProjectionHead(nn.Module):
             pos_distances = pos_bboxes_3d[:, 5:6]  # (Npos, 1)
         else:
             pos_distances = torch.norm(pos_bboxes_3d[:, 3:6], p=2, dim=1, keepdim=True)
-        return proj_r_mats, proj_t_vecs, pos_bboxes_3d, pos_distances, img_shapes
+        return pos_cam_intrinsic, pos_bboxes_3d, pos_distances, img_shapes
 
     def get_distance(self, t_vec):
         if self.distance_mode == 'z-depth':

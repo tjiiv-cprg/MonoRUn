@@ -108,9 +108,7 @@ class MonoRUnRoIHead(StandardRoIHead):
                       gt_coords_3d=None,
                       gt_coords_3d_mask=None,
                       coord_2d=None,
-                      cam_intrinsic=None,
-                      gt_proj_r_mats=None,
-                      gt_proj_t_vecs=None):
+                      cam_intrinsic=None):
         assert self.with_bbox and self.with_noc and self.with_reg
 
         num_imgs = len(img_metas)
@@ -224,7 +222,7 @@ class MonoRUnRoIHead(StandardRoIHead):
                 coords_3d_pred,
                 noc_results['proj_logstd'],
                 coords_3d_var, sampling_results,
-                coords_2d_roi, gt_proj_r_mats, gt_proj_t_vecs,
+                coords_2d_roi, cam_intrinsic,
                 gt_bboxes_3d, img_metas)
             losses.update(projection_results['loss_proj'])
         else:
@@ -236,8 +234,8 @@ class MonoRUnRoIHead(StandardRoIHead):
                 coords_3d_pred,
                 dimensions_pred,
                 projection_results['img_shapes'],
-                sampling_results,
-                projection_results['pos_bboxes_3d'], cam_intrinsic)
+                projection_results['pos_bboxes_3d'],
+                projection_results['pos_cam_intrinsic'])
             losses.update(pose_results['loss_pose'])
 
             if self.with_score:
@@ -375,22 +373,21 @@ class MonoRUnRoIHead(StandardRoIHead):
 
     def _projection_forward_train(
             self, coords_3d_pred, proj_logstd, coords_3d_var, sampling_results,
-            coords_2d_roi, gt_proj_r_mats, gt_proj_t_vecs,
-            gt_bboxes_3d, img_metas):
-        (proj_r_mats,
-         proj_t_vecs,
+            coords_2d_roi, cam_intrinsic, gt_bboxes_3d, img_metas):
+        (pos_cam_intrinsic,
          pos_bboxes_3d,
          pos_distances,
          img_shapes) = self.projection_head.get_properties(
-            sampling_results, gt_proj_r_mats, gt_proj_t_vecs,
-            gt_bboxes_3d, img_metas)
+            sampling_results, cam_intrinsic, gt_bboxes_3d, img_metas)
         coords_2d_proj = self.projection_head(
-            coords_3d_pred, proj_r_mats, proj_t_vecs, img_shapes)
+            coords_3d_pred, pos_bboxes_3d[:, 3:7], pos_cam_intrinsic, img_shapes)
         loss_proj = self.projection_head.loss(
             coords_2d_proj, proj_logstd, coords_2d_roi, pos_distances)
         projection_results = dict(loss_proj=loss_proj,
                                   img_shapes=img_shapes,
-                                  pos_bboxes_3d=pos_bboxes_3d)
+                                  pos_bboxes_3d=pos_bboxes_3d,
+                                  pos_cam_intrinsic=pos_cam_intrinsic,
+                                  pos_distances=pos_distances)
         projection_results.update(
             self._projection_decode(
                 proj_logstd, coords_3d_var, pos_distances))
@@ -411,15 +408,7 @@ class MonoRUnRoIHead(StandardRoIHead):
 
     def _pose_forward_train(
             self, coords_2d, proj_logstd, coords_3d_pred, dimensions_pred, img_shapes,
-            sampling_results, pos_bboxes_3d, cam_intrinsic):
-        pos_cam_intrinsic = []
-        for cam_intrinsic_single, res in zip(
-                cam_intrinsic, sampling_results):
-            pos_cam_intrinsic += [cam_intrinsic_single] * len(res.pos_inds)
-        if len(pos_cam_intrinsic):
-            pos_cam_intrinsic = torch.stack(pos_cam_intrinsic, dim=0)
-        else:
-            pos_cam_intrinsic = coords_2d.new_zeros((0, 3, 3))
+            pos_bboxes_3d, pos_cam_intrinsic):
         pose_results = self._pose_forward(
             coords_2d, proj_logstd, coords_3d_pred, pos_cam_intrinsic, img_shapes)
         yaw_targets, trans_targets = self.pose_head.get_targets(

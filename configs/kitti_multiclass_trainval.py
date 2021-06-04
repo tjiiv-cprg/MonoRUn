@@ -227,7 +227,7 @@ train_pipeline = [
     dict(type='DefaultFormatBundle3D'),
     dict(type='Collect',
          keys=['img', 'gt_bboxes', 'gt_bboxes_ignore', 'gt_labels', 'gt_bboxes_3d',
-               'gt_proj_r_mats', 'gt_proj_t_vecs', 'coord_2d', 'cam_intrinsic']),
+               'coord_2d', 'cam_intrinsic']),
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),

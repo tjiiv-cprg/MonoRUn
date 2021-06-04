@@ -134,8 +134,6 @@ class KITTI3DDataset(CustomDataset):
         gt_occlusion = []
         gt_alpha = []
         gt_bboxes_3d = []
-        gt_proj_r_mats = []
-        gt_proj_t_vecs = []
 
         label = self.labels[idx]
 
@@ -157,21 +155,6 @@ class KITTI3DDataset(CustomDataset):
                 gt_bboxes.append(bbox)
                 gt_bboxes_3d.append(bbox_3d)
 
-                yaw = bbox_3d[6]
-                sin_yaw = np.sin(yaw)
-                cos_yaw = np.cos(yaw)
-                pose_r_mat = np.array(
-                    [[cos_yaw, 0, sin_yaw],
-                     [0, 1, 0],
-                     [-sin_yaw, 0, cos_yaw]], dtype=np.float32)
-                pose_t_vec = np.array(
-                    bbox_3d[3:6], dtype=np.float32)[..., np.newaxis]  # (3, 1)
-
-                proj_r_mat = np.matmul(cam_intrinsic, pose_r_mat)
-                proj_t_vec = np.matmul(cam_intrinsic, pose_t_vec) + cali_t_vec
-                gt_proj_r_mats.append(proj_r_mat)
-                gt_proj_t_vecs.append(proj_t_vec)
-
             elif instance_class.lower() == 'dontcare':
                 gt_bboxes_ignore.append(bbox)
 
@@ -180,15 +163,11 @@ class KITTI3DDataset(CustomDataset):
             gt_labels = np.array(gt_labels, dtype=np.int64)
             gt_bboxes_3d = np.array(gt_bboxes_3d, dtype=np.float32)
             gt_bboxes_3d[:, [0, 1, 2]] = gt_bboxes_3d[:, [2, 0, 1]]  # to lhw
-            gt_proj_r_mats = np.array(gt_proj_r_mats, dtype=np.float32)
-            gt_proj_t_vecs = np.array(gt_proj_t_vecs, dtype=np.float32)
             object_ids = np.array(object_ids, dtype=np.int)
         else:
             gt_bboxes = np.empty((0, 4), dtype=np.float32)
             gt_labels = np.empty(0, dtype=np.int64)
             gt_bboxes_3d = np.empty((0, 7), dtype=np.float32)
-            gt_proj_r_mats = np.empty((0, 3, 3), dtype=np.float32)
-            gt_proj_t_vecs = np.empty((0, 3, 1), dtype=np.float32)
             object_ids = np.empty(0, dtype=np.int)
 
         gt_bboxes_3d_eval = gt_bboxes_3d.copy()  # bboxes in reference space (for eval)
@@ -213,9 +192,7 @@ class KITTI3DDataset(CustomDataset):
             occlusion=gt_occlusion,
             alpha=gt_alpha,
             bboxes_3d=gt_bboxes_3d,
-            bboxes_3d_eval=gt_bboxes_3d_eval,
-            gt_proj_r_mats=gt_proj_r_mats,
-            gt_proj_t_vecs=gt_proj_t_vecs)
+            bboxes_3d_eval=gt_bboxes_3d_eval)
         return ann
 
     def evaluate(self,

@@ -152,9 +152,7 @@ def crop_3d(results, crop_box, bbox2mask, bbox2label, bbox2bbox_3d,
         if bbox_3d_key in results:
             results[bbox_3d_key] = results[bbox_3d_key][valid_inds]
         if key == 'gt_bboxes':
-            for misc_key in [
-                    'gt_proj_r_mats', 'gt_proj_t_vecs', 'gt_coords_3d_mask',
-                    'gt_coords_3d', 'truncation']:
+            for misc_key in ['gt_coords_3d_mask', 'gt_coords_3d', 'truncation']:
                 if misc_key in results:
                     if isinstance(results[misc_key], list):
                         results[misc_key] = [

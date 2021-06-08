@@ -63,7 +63,7 @@ To train without LiDAR supervision:
 python train.py configs/kitti_multiclass.py --gpu-ids 0 1
 ```
 
-where  `--gpu-ids 0 1` specifies the GPU IDs. In the paper we use two GPUs for distributed training.  The number of GPUs affects the mini-batch size. You may change the `samples_per_gpu` option in the config file to vary the number of images per GPU.
+where  `--gpu-ids 0 1` specifies the GPU IDs. In the paper we use two GPUs for distributed training.  The number of GPUs affects the mini-batch size. You may change the `samples_per_gpu` option in the config file to vary the number of images per GPU. If you encounter out of memory issue, add the argument `--seed 0 --deterministic` to save GPU memory.
 
 To train with LiDAR supervision:
 

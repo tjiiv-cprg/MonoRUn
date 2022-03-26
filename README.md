@@ -1,5 +1,7 @@
 # MonoRUn
 
+**NEWS: The code of our subsequent work [EPro-PnP](https://arxiv.org/abs/2203.13254) (CVPR 2022) has been released [here](https://github.com/tjiiv-cprg/EPro-PnP)!**
+
 **MonoRUn: Monocular 3D Object Detection by Reconstruction and Uncertainty Propagation**. CVPR 2021. [[paper](https://arxiv.org/abs/2103.12605)]
 Hansheng Chen, Yuyao Huang, Wei Tian*, Zhong Gao, Lu Xiong. (\*Corresponding author: Wei Tian.)
 

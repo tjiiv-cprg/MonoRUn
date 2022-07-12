@@ -1,8 +1,9 @@
 # MonoRUn
 
-**NEWS: The code of our subsequent work [EPro-PnP](https://arxiv.org/abs/2203.13254) (CVPR 2022 Oral) has been released [here](https://github.com/tjiiv-cprg/EPro-PnP)!**
+**NEWS: The code of our subsequent work [EPro-PnP](https://arxiv.org/abs/2203.13254) (CVPR 2022 Best Student Paper) has been released [here](https://github.com/tjiiv-cprg/EPro-PnP)!**
 
 **MonoRUn: Monocular 3D Object Detection by Reconstruction and Uncertainty Propagation**. CVPR 2021. [[paper](https://arxiv.org/abs/2103.12605)]
+<br>
 Hansheng Chen, Yuyao Huang, Wei Tian*, Zhong Gao, Lu Xiong. (\*Corresponding author: Wei Tian.)
 
 This repository is the PyTorch implementation for MonoRUn. The codes are based on [MMDetection](https://github.com/open-mmlab/mmdetection) and [MMDetection3D](https://github.com/open-mmlab/mmdetection3d),  although we use our own data formats. The PnP C++ codes are modified from [PVNet](https://github.com/zju3dv/clean-pvnet).
